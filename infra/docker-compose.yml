@@ -24,6 +24,34 @@ services:
       timeout: 5s
       retries: 5
 
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: ocean-backend
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+    ports:
+      - "8000:8000"
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: ${API_MEMORY_LIMIT:-1g}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
   nginx:
     image: nginx:alpine
     container_name: ocean-nginx
@@ -36,6 +64,7 @@ services:
       - nginx_logs:/var/log/nginx
     depends_on:
       - timescaledb
+      - backend
     deploy:
       resources:
         limits:
