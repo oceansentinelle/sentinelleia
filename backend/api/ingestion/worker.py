@@ -30,6 +30,9 @@ def get_connector():
     src = os.getenv("DATA_SOURCE", "erddap").lower()
     if src == "erddap":
         return ERDDAPConnector()
+    if src == "coriolis_platform":
+        from .coriolis_platform import CoriolisPlatformConnector
+        return CoriolisPlatformConnector()
     raise RuntimeError(f"Unsupported DATA_SOURCE={src}")
 
 def read_last_time(db: Session, source: str, station_id: str):
