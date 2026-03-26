@@ -76,7 +76,7 @@ async def get_iob_card(db: Session = Depends(get_db)):
         
         active_alerts = db.query(Alert).filter(
             Alert.station_id == "BARAG",
-            Alert.resolved == 0
+            Alert.resolved == False
         ).order_by(desc(Alert.time)).limit(5).all()
         
         alerts_list = [

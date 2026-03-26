@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Float, Integer, TIMESTAMP, JSON
+from sqlalchemy import Column, String, Float, Integer, TIMESTAMP, JSON, Boolean
 from sqlalchemy.dialects.postgresql import JSONB
 from .database import Base
 from datetime import datetime
@@ -35,6 +35,6 @@ class Alert(Base):
     alert_type = Column(String(50), nullable=False)
     severity = Column(String(20), nullable=False)
     message = Column(String)
-    resolved = Column(Integer, default=0)
+    resolved = Column(Boolean, default=False)
     resolved_at = Column(TIMESTAMP(timezone=True))
     meta = Column("metadata", JSONB)
