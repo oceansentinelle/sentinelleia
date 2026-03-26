@@ -13,7 +13,7 @@ class SensorData(Base):
     unit = Column(String(20))
     quality_code = Column(Integer)
     source = Column(String(100))
-    metadata = Column(JSONB)
+    meta = Column("metadata", JSONB)
 
 class Prediction(Base):
     __tablename__ = "predictions"
@@ -24,7 +24,7 @@ class Prediction(Base):
     prediction_type = Column(String(50))
     predicted_value = Column(Float)
     confidence = Column(Float)
-    metadata = Column(JSONB)
+    meta = Column("metadata", JSONB)
 
 class Alert(Base):
     __tablename__ = "alerts"
@@ -37,4 +37,4 @@ class Alert(Base):
     message = Column(String)
     resolved = Column(Integer, default=0)
     resolved_at = Column(TIMESTAMP(timezone=True))
-    metadata = Column(JSONB)
+    meta = Column("metadata", JSONB)
