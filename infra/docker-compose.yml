@@ -52,6 +52,31 @@ services:
       retries: 3
       start_period: 40s
 
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    container_name: ocean-frontend
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_BASE: /api
+      NEXT_PUBLIC_DEFAULT_STATION_ID: BARAG
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: ${FRONTEND_MEMORY_LIMIT:-512m}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/health | grep -q ok || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
   nginx:
     image: nginx:alpine
     container_name: ocean-nginx
@@ -65,6 +90,7 @@ services:
     depends_on:
       - timescaledb
       - backend
+      - frontend
     deploy:
       resources:
         limits:
