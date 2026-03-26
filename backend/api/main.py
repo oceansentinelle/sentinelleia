@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from sqlalchemy import func, desc
+from sqlalchemy import func, desc, text
 from typing import List, Dict, Any
 from datetime import datetime, timedelta
 import os
@@ -23,6 +23,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+LATEST_BY_PARAM_SQL = text("""
+SELECT DISTINCT ON (parameter)
+  time, station_id, parameter, value, unit, quality_code
+FROM sensor_data
+WHERE station_id = :station_id
+ORDER BY parameter, time DESC;
+""")
+
 @app.on_event("startup")
 async def startup():
     pass
@@ -37,45 +45,25 @@ async def health_check():
     }
 
 @app.get("/v1/iob/card")
-async def get_iob_card(db: Session = Depends(get_db)):
+async def get_iob_card(station_id: str = "BARAG", db: Session = Depends(get_db)):
     try:
-        latest_data = db.query(SensorData).filter(
-            SensorData.station_id == "BARAG"
-        ).order_by(desc(SensorData.time)).limit(20).all()
-        
-        if not latest_data:
-            return {
-                "station_id": "BARAG",
-                "station_name": "Bouée BARAG - Bassin d'Arcachon",
-                "last_update": None,
-                "parameters": {},
-                "predictions": {
-                    "temperature": {"value": None, "trend": "stable", "confidence": 0},
-                    "salinity": {"value": None, "trend": "stable", "confidence": 0},
-                    "ph": {"value": None, "trend": "stable", "confidence": 0},
-                    "dissolved_oxygen": {"value": None, "trend": "stable", "confidence": 0}
-                },
-                "alerts": []
-            }
+        rows = db.execute(LATEST_BY_PARAM_SQL, {"station_id": station_id}).mappings().all()
         
         parameters = {}
-        latest_time = None
+        last_update = None
         
-        for record in latest_data:
-            if latest_time is None or record.time > latest_time:
-                latest_time = record.time
-            
-            param_key = record.parameter
-            if param_key not in parameters:
-                parameters[param_key] = {
-                    "value": record.value,
-                    "unit": record.unit,
-                    "quality_code": record.quality_code,
-                    "timestamp": record.time.isoformat()
-                }
+        for r in rows:
+            parameters[r["parameter"]] = {
+                "value": r["value"],
+                "unit": r["unit"],
+                "quality_code": r["quality_code"],
+                "timestamp": r["time"].isoformat()
+            }
+            if last_update is None or r["time"] > last_update:
+                last_update = r["time"]
         
         active_alerts = db.query(Alert).filter(
-            Alert.station_id == "BARAG",
+            Alert.station_id == station_id,
             Alert.resolved == False
         ).order_by(desc(Alert.time)).limit(5).all()
         
@@ -114,19 +102,54 @@ async def get_iob_card(db: Session = Depends(get_db)):
         }
         
         return {
-            "station_id": "BARAG",
-            "station_name": "Bouée BARAG - Bassin d'Arcachon",
-            "last_update": latest_time.isoformat() if latest_time else None,
+            "station_id": station_id,
+            "station_name": f"Station {station_id}",
+            "last_update": last_update.isoformat() if last_update else None,
             "parameters": parameters,
             "predictions": predictions,
             "alerts": alerts_list,
             "metadata": {
-                "source": "Hub'Eau Quadrige",
-                "location": "Bassin d'Arcachon",
-                "coordinates": {"lat": 44.6667, "lon": -1.1667}
+                "source": "TimescaleDB",
+                "location": "Bassin d'Arcachon" if station_id == "BARAG" else "Unknown",
+                "coordinates": {"lat": 44.6667, "lon": -1.1667} if station_id == "BARAG" else None
             }
         }
     
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+@app.get("/v1/alerts")
+async def get_alerts(
+    station_id: str = "BARAG",
+    resolved: bool = False,
+    limit: int = 50,
+    db: Session = Depends(get_db)
+):
+    try:
+        query = db.query(Alert).filter(Alert.station_id == station_id)
+        
+        if not resolved:
+            query = query.filter(Alert.resolved == False)
+        
+        alerts = query.order_by(desc(Alert.time)).limit(limit).all()
+        
+        return {
+            "station_id": station_id,
+            "resolved": resolved,
+            "count": len(alerts),
+            "alerts": [
+                {
+                    "id": alert.id,
+                    "time": alert.time.isoformat(),
+                    "alert_type": alert.alert_type,
+                    "severity": alert.severity,
+                    "message": alert.message,
+                    "resolved": alert.resolved,
+                    "resolved_at": alert.resolved_at.isoformat() if alert.resolved_at else None
+                }
+                for alert in alerts
+            ]
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
