@@ -107,6 +107,18 @@ VALUES
     (NOW(), 'BARAG', 'dissolved_oxygen', 7.8, 'mg/L', 1, 'Hub''Eau Quadrige', '{"location": "Bassin Arcachon"}')
 ON CONFLICT DO NOTHING;
 
+-- Create ingestion_state table (tracking last ingestion time per source/station)
+CREATE TABLE IF NOT EXISTS ingestion_state (
+  source TEXT NOT NULL,
+  station_id VARCHAR(50) NOT NULL,
+  last_time TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (source, station_id)
+);
+
+-- Grant permissions on ingestion_state
+GRANT ALL PRIVILEGES ON ingestion_state TO oceansentinel;
+
 -- Vacuum and analyze
 VACUUM ANALYZE sensor_data;
 VACUUM ANALYZE predictions;

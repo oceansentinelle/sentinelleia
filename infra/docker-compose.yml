@@ -77,6 +77,36 @@ services:
       retries: 3
       start_period: 40s
 
+  ingestor:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: ocean-ingestor
+    restart: unless-stopped
+    command: ["python", "-m", "api.ingestion.worker"]
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      DATA_SOURCE: ${DATA_SOURCE:-erddap}
+      STATION_ID: ${STATION_ID:-BARAG}
+      INGEST_INTERVAL_SECONDS: ${INGEST_INTERVAL_SECONDS:-900}
+      INGEST_LOOKBACK_MINUTES: ${INGEST_LOOKBACK_MINUTES:-60}
+      ERDDAP_URL_TEMPLATE: ${ERDDAP_URL_TEMPLATE}
+      ERDDAP_SOURCE_NAME: ${ERDDAP_SOURCE_NAME:-Coriolis/ERDDAP}
+      HTTP_TIMEOUT_SECONDS: ${HTTP_TIMEOUT_SECONDS:-20}
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: ${INGESTOR_MEMORY_LIMIT:-256m}
+
   nginx:
     image: nginx:alpine
     container_name: ocean-nginx
