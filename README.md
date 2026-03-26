@@ -96,6 +96,10 @@ sentinelleia/
 - **SACS** : Superviseur Multi-Agent System
 - **Cascade AI** : Agent DevOps intégré Windsurf IDE
 
-## 📜 Licence
+## � Remerciements
+
+**« Ce travail a bénéficié du soutien de l'Infrastructure de Recherche Littorale et Côtière : IR ILICO ».**
+
+## �📜 Licence
 
 MIT License — Ocean Sentinel V3.0 (2026)

@@ -29,7 +29,12 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <Providers>{children}</Providers>
+        <Providers>
+          <div className="flex-1">{children}</div>
+          <footer className="text-xs opacity-70 text-center py-4 border-t mt-8">
+            Ce travail a bénéficié du soutien de l&apos;Infrastructure de Recherche Littorale et Côtière : IR ILICO.
+          </footer>
+        </Providers>
       </body>
     </html>
   );
