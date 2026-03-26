@@ -234,19 +234,115 @@ Initialized empty Git repository in C:/Users/ktprt/Documents/sentinelleia/.git/
 
 ---
 
-## PROCHAINES ÉTAPES — MVP SEMAINE 1
+---
 
-### Étape 5 : Infrastructure Docker Compose
-- [ ] Créer `infra/docker-compose.yml` (TimescaleDB, FastAPI, Nginx)
-- [ ] Créer `infra/timescaledb/init.sql` (hypertables, compression)
-- [ ] Créer `infra/nginx/nginx.conf` (reverse proxy, SSL ready)
-- [ ] Tester `docker compose up -d` sur VPS
+## ÉTAPE 5 : INFRASTRUCTURE DOCKER COMPOSE ✅
+
+### Étape 5.1 : Création fichiers infrastructure ✅
+**Fichiers créés** :
+- `infra/docker-compose.yml` (TimescaleDB + Nginx)
+- `infra/timescaledb/init.sql` (hypertables, compression, agrégats)
+- `infra/nginx/nginx.conf` (reverse proxy, rate limiting)
+- `infra/README.md` (documentation infrastructure)
+
+**Commit** : `12bc14e` - "Add infrastructure Docker Compose (TimescaleDB + Nginx) - Étape 5"  
+**Timestamp** : 26/03/2026 19:05 UTC+01:00
+
+### Étape 5.2 : Corrections healthcheck ✅
+**Problème 1** : TimescaleDB healthcheck cherchait database "oceansentinel" au lieu de "ocean_sentinel_prod"  
+**Solution** : Modifier healthcheck pour utiliser variable `${POSTGRES_DB}`  
+**Commit** : `f0e72af` - "Fix TimescaleDB healthcheck - use POSTGRES_DB variable"
+
+**Problème 2** : Nginx healthcheck utilisait `wget` (connection refused)  
+**Solution** : Remplacer par test PID file `test -f /var/run/nginx.pid`  
+**Commit** : `ebfeb86` - "Fix Nginx healthcheck - use PID file test instead of wget"
+
+**Timestamp corrections** : 26/03/2026 19:10-19:33 UTC+01:00
+
+### Étape 5.3 : Génération .env.production ✅
+**Problème** : Variables environnement contenaient `$(openssl rand -base64 32)` non évaluées  
+**Solution** : Régénérer .env.production avec vraies valeurs aléatoires
+
+**Variables générées** :
+```env
+POSTGRES_PASSWORD=uC2xH9NfypxV3qDLNpd9oC6SVp7GnqIzgYU58Ks30JY=
+REDIS_PASSWORD=dYkkQIJ/2KOruSmny/HBjPoQboZ7xnJZjzVgXLxt404=
+SECRET_KEY=R550FN+alI4JkYshh1bMzzbgUdb0XgfaoDIjDoCMevxSyE3+v6JDEixkBALMxrpCM3DDceT+Mzd4F+Bmp1kRsA==
+```
+
+**Timestamp** : 26/03/2026 19:19 UTC+01:00
+
+### Étape 5.4 : Déploiement VPS ✅
+**Commandes exécutées** :
+```bash
+cd ~/apps/ocean-sentinel-main/infra
+docker compose --env-file ../.env.production up -d
+```
+
+**Services déployés** :
+- `ocean-timescaledb` : timescale/timescaledb:latest-pg14
+- `ocean-nginx` : nginx:alpine
+
+**Timestamp** : 26/03/2026 19:21 UTC+01:00
+
+### Étape 5.5 : Tests infrastructure ✅
+
+**Test 1 : Tables TimescaleDB**
+```sql
+\dt
+-- Résultat : alerts, predictions, sensor_data
+```
+
+**Test 2 : Données sample**
+```sql
+SELECT * FROM sensor_data ORDER BY time DESC LIMIT 5;
+-- Résultat : 4 rows (BARAG - temperature, salinity, ph, dissolved_oxygen)
+```
+
+**Test 3 : Hypertables**
+```sql
+SELECT * FROM timescaledb_information.hypertables;
+-- Résultat : sensor_data (compression enabled), predictions
+```
+
+**Test 4 : Nginx health**
+```bash
+curl http://localhost/health
+-- Résultat : healthy
+```
+
+**Test 5 : Statut services**
+```bash
+docker compose ps
+-- Résultat : ocean-nginx (healthy), ocean-timescaledb (healthy)
+```
+
+**Timestamp tests** : 26/03/2026 19:28-19:33 UTC+01:00
+
+### Résumé Étape 5 ✅
+
+**Durée totale** : 28 minutes (19:05 → 19:33)
+
+**Infrastructure déployée** :
+- ✅ TimescaleDB avec hypertables (chunks 1 jour, compression 7 jours, rétention 1 an)
+- ✅ Données sample Bouée BARAG Arcachon (4 paramètres)
+- ✅ Nginx reverse proxy (rate limiting, gzip, health endpoint)
+- ✅ Configuration production sécurisée (passwords 32-64 bytes)
+- ✅ Volumes persistants (timescaledb_data, nginx_logs)
+- ✅ Network Docker (ocean-sentinel-network)
+
+**Commits GitHub** : 3 commits (12bc14e, f0e72af, ebfeb86)
+
+---
+
+## PROCHAINES ÉTAPES — MVP SEMAINE 1
 
 ### Étape 6 : Backend FastAPI
 - [ ] Créer `backend/api/main.py` (endpoints /health, /v1/iob/card)
 - [ ] Créer `backend/api/models.py` (SQLAlchemy + TimescaleDB)
 - [ ] Créer `backend/requirements.txt` (FastAPI, psycopg2, SQLAlchemy)
 - [ ] Dockerfile backend (Python 3.11-slim)
+- [ ] Ajouter service `backend` dans docker-compose.yml
 
 ### Étape 7 : Frontend Next.js 14
 - [ ] Créer `frontend/` avec Next.js App Router
@@ -262,5 +358,5 @@ Initialized empty Git repository in C:/Users/ktprt/Documents/sentinelleia/.git/
 
 ---
 
-**Dernière mise à jour** : 26/03/2026 18:40 UTC+01:00  
-**Prochaine étape** : Créer infrastructure Docker Compose (Étape 5)
+**Dernière mise à jour** : 26/03/2026 19:33 UTC+01:00  
+**Prochaine étape** : Backend FastAPI (Étape 6)
