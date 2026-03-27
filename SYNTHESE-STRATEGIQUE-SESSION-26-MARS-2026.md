@@ -492,19 +492,52 @@ Ingestor insère données TimescaleDB toutes les 15min, dashboard http://76.13.4
 - predictions : Sorties modèles ML (vide)
 - alerts : Alertes écologiques (vide)
 
+### État Final Session — 27 Mars 2026 18:00
+
+**🎉 SUCCÈS DÉPLOIEMENT MVP COMPLET**
+
+**Plateforme opérationnelle** : http://76.13.43.3
+
+**Stack déployée** :
+- ✅ Frontend Next.js (Dashboard Ocean Sentinel)
+- ✅ Backend FastAPI (API /v1/iob/card)
+- ✅ TimescaleDB (données sensor_data)
+- ✅ Nginx reverse proxy + SSL
+- ✅ Docker Compose orchestration
+
+**Données affichées** :
+- Station BARAG - Bassin d'Arcachon
+- Température : 15.20°C
+- Salinité : 35.10 PSU
+- pH : 8.10
+- O₂ dissous : 7.80 mg/L
+- Source : Hub'Eau Quadrige (données mock)
+- Timestamp : 2026-03-27 14:44:31
+
+**État ingestion temps réel** :
+- ❌ SEANOE CSV : OOM (fichier 22MB trop volumineux pour RAM VPS)
+- ❌ ERDDAP EMODnet : Aucun dataset Arcachon disponible
+- ✅ Données mock TimescaleDB : Fonctionnelles pour démonstration MVP
+
 ### Prochaine Priorité Stratégique
 
-**Activer ingestion automatique temps réel depuis API Coriolis BARAG.**
+**Implémenter ingestion Hub'Eau API réelle pour données Arcachon temps réel.**
 
-**Actions critiques** :
-1. Identifier URL API réelle (méthode F12 Network)
-2. Valider Platform ID BARAG (sanity check nom + coordonnées)
-3. Configurer .env.production VPS
-4. Déployer ingestor
-5. Vérifier données TimescaleDB → Dashboard
+**Actions futures** :
+1. Explorer Hub'Eau API (https://hubeau.eaufrance.fr/) pour données Bassin Arcachon
+2. Alternative : Coriolis In-Situ TAC (https://data.marine.copernicus.eu/)
+3. Implémenter connecteur streaming léger (compatible RAM VPS 512MB)
+4. Configurer ingestion automatique toutes les 15 minutes
+5. Vérifier données temps réel → Dashboard
 
 **Critère succès** : Dashboard affiche données BARAG temps réel sans intervention manuelle.
 
+**Commits session** :
+- `ebd1f1e` : Fix worker.py source_name dynamique
+- `286e7cf` : Fix SEANOE time filter (remove upper bound)
+- `3a1c685` : Fix SEANOE column_map avec unités
+- `b04a181` : Fix RAM ingestor 256m→512m
+
 ---
 
-**FIN SYNTHÈSE STRATÉGIQUE SESSION 26 MARS 2026**
+**FIN SYNTHÈSE STRATÉGIQUE SESSION 26-27 MARS 2026**
