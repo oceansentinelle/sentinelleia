@@ -61,7 +61,7 @@ class SEANOEConnector(Connector):
             if not t:
                 continue
 
-            if t < start or t > end:
+            if t < start:
                 continue
 
             qc_str = row.get("QC", "")
