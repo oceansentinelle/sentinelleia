@@ -33,6 +33,9 @@ def get_connector():
     if src == "coriolis_platform":
         from .coriolis_platform import CoriolisPlatformConnector
         return CoriolisPlatformConnector()
+    if src == "seanoe":
+        from .seanoe import SEANOEConnector
+        return SEANOEConnector()
     raise RuntimeError(f"Unsupported DATA_SOURCE={src}")
 
 def read_last_time(db: Session, source: str, station_id: str):
