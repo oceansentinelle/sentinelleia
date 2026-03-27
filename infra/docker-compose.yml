@@ -110,7 +110,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: ${INGESTOR_MEMORY_LIMIT:-256m}
+          memory: ${INGESTOR_MEMORY_LIMIT:-512m}
 
   nginx:
     image: nginx:alpine
