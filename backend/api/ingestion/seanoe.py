@@ -35,10 +35,10 @@ class SEANOEConnector(Connector):
         self.headers = {"User-Agent": "OceanSentinel/3.0 (SEANOE ingestor)"}
 
         self.column_map = {
-            "TEMP LEVEL1": ("temperature", "°C"),
-            "PSAL LEVEL1": ("salinity", "PSU"),
-            "FLU2 LEVEL1": ("fluorescence", "mg/m³"),
-            "TUR4 LEVEL1": ("turbidity", "NTU"),
+            "TEMP LEVEL1 (degree_Celsius)": ("temperature", "°C"),
+            "PSAL LEVEL1 (psu)": ("salinity", "PSU"),
+            "FLU2 LEVEL1 (milligram/m3)": ("fluorescence", "mg/m³"),
+            "TUR4 LEVEL1 (ntu)": ("turbidity", "NTU"),
         }
 
     def fetch(self, station_id: str, start: datetime, end: datetime):
