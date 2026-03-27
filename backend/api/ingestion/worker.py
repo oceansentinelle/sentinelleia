@@ -73,7 +73,7 @@ def main():
     lookback_min = int(os.getenv("INGEST_LOOKBACK_MINUTES", "60"))
 
     connector = get_connector()
-    source_name = os.getenv("ERDDAP_SOURCE_NAME", "ERDDAP")
+    source_name = connector.source_name
 
     print(f"[ingestor] start station={station_id} interval={interval}s source={source_name}", flush=True)
 
