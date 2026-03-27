@@ -82,6 +82,12 @@ export default function Home() {
         </Badge>
       </div>
 
+      <div className="flex items-center justify-center">
+        <Badge variant="outline" className="text-xs px-4 py-2 border-amber-300 bg-amber-50 text-amber-800">
+          ⚠️ Données de démonstration (timestamp statique)
+        </Badge>
+      </div>
+
       <section className="grid md:grid-cols-4 gap-4">
         {cardQ.isLoading
           ? Array.from({ length: 4 }).map((_, i) => (

@@ -85,11 +85,40 @@ sentinelleia/
 - Firewall UFW strict (ports 22, 80, 443)
 - Secrets gérés via `.env.production`
 
+## 🎯 État MVP Actuel
+
+**Plateforme opérationnelle** : http://76.13.43.3
+
+**Stack déployée** :
+- ✅ Dashboard Next.js 16 (interface temps réel)
+- ✅ Backend FastAPI (API DB-first, SQL optimisé)
+- ✅ TimescaleDB (hypertables, compression 7 jours)
+- ✅ Nginx reverse proxy
+- ✅ Docker Compose orchestration (5 services)
+
+**Données affichées** :
+- Station BARAG - Bassin d'Arcachon
+- Paramètres : Température, Salinité, pH, O₂ dissous
+- Source : Données de démonstration (timestamp statique)
+
+**⚠️ Limitation Ingestion Temps Réel** :
+
+Après exploration exhaustive des sources de données océanographiques françaises (Hub'Eau, SOMLIT, COAST-HF, Coriolis Côtier, SIBA), **aucune API REST publique temps réel** n'a été identifiée pour le Bassin d'Arcachon compatible avec les contraintes du projet.
+
+**Alternatives Phase 3** :
+- Partenariat SIBA (accesdonneespubliques@siba-bassin-arcachon.fr)
+- Investigation Coriolis Côtier API (reverse engineering)
+- COAST-HF data request (https://www.somlit.fr/demande-de-donnees/)
+
+Voir [EXPLORATION-API-TEMPS-REEL-ARCACHON.md](EXPLORATION-API-TEMPS-REEL-ARCACHON.md) pour détails complets.
+
 ## 📝 Documentation
 
 - [Architecture MAS](docs/architecture-mas.md)
 - [Déploiement](docs/deployment.md)
 - [Infrastructure Audit](INFRASTRUCTURE_AUDIT.md)
+- [Exploration API Temps Réel](EXPLORATION-API-TEMPS-REEL-ARCACHON.md)
+- [Bilan Stratégique Session 27 Mars](BILAN-STRATEGIQUE-SESSION-27-MARS-2026.md)
 
 ## 👥 Équipe
 
